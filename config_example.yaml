@@ -1,0 +1,5 @@
+api_key: <api key>
+hub_url: <hub url>
+sensor_ids:
+  - <sensor id>
+  - ...
