@@ -10,8 +10,9 @@ def readSensor(path, ids):
         if success == "YES":
             for j in range(min(len(ans)-1, len(ids)-1)):
                 current_line = ans[j+1].replace("\n", "")
-                current_value = float(current_line.split("t=")[1])/1000
-                data[ids[j]] = current_value
+                if current_line[:2] != "00":
+                    current_value = float(current_line.split("t=")[1])/1000
+                    data[ids[j]] = current_value
     except:
         pass
 
