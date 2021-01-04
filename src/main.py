@@ -39,7 +39,7 @@ while True:
         start = time.time()
         data = readSensor("/sys/bus/w1/devices/28-0118685f51ff/w1_slave", sensor_ids)
         print("sending data ", data)
-        sio.emit("new_data", {"Data": data}, namespace="/sensor")
+        sio.emit("new_data", {"data": data}, namespace="/sensor")
         end = time.time()
         duration = end - start
         waittime = max(0, delay - duration)
