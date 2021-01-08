@@ -1,2 +1,4 @@
 *.pyc
 config.yaml
+src/fallback/*
+!src/fallback/.keep

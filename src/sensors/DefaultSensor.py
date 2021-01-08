@@ -1,5 +1,5 @@
 class DefaultSensor:
-    def __init__(self, id, address, controller=None, type="sbutract", target=None, accuracy=None):
+    def __init__(self, id, address, controller=None, type="subtract", target=None, accuracy=None):
         self.id = id
         self.address = address
         self.controller = controller
@@ -7,6 +7,9 @@ class DefaultSensor:
         self.target = target
         self.accuracy = accuracy
         self.type = type
+
+    def __str__(self):
+        return f"<DefaultSensor: id {self.id}, address: {self.address}, target {self.target}, type: {self.type}"
 
     def setAccuracy(self, accuracy):
         self.accuracy = accuracy
@@ -36,16 +39,16 @@ class DefaultSensor:
             max = self.target + self.accuracy
             min = self.target - self.accuracy
             try:
-                if self.type == "sbutract":
+                if self.type == "subtract":
                     if max < current_data:
-                        this.controller.on()
+                        self.controller.turnOn()
                     elif min > current_data:
-                        this.controller.off()
+                        self.controller.turnOff()
                 elif self.type == "add":
                     if max > current_data:
-                        this.controller.off()
+                        self.controller.turnOff()
                     elif min < current_data:
-                        this.controller.on()
+                        self.controller.turnOn()
                 success = True
             except Exception as e:
                 pass

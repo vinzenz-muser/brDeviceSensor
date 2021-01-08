@@ -5,6 +5,7 @@ import os
 import time
 import random
 import requests
+import json
 from controllers_register import controllers as configured_controllers
 from helpers import setup
 
@@ -23,11 +24,34 @@ def disconnect():
 
 @sio.event(namespace="/sensor")
 def update_controller(data):
+    print("Got data from hub: ", data)
+    set_targets(data)
+
+def set_targets(data):
+    global sensors
     target = float(data["value"])
     accuracy = float(data["accuracy"])
     sensor_id = int(data["sensor_id"])
     sensors[sensor_id].setTarget(target)
     sensors[sensor_id].setAccuracy(accuracy)
+
+    update_targets_on_server(sensor_id)
+
+    lastval = {sensor.id: {'target': sensor.target, 'accuracy': sensor.accuracy} for _, sensor in sensors.items()}
+    with open('src/fallback/controller_data.json', 'w') as f:
+        json.dump(lastval, f)
+
+def update_targets_on_server(sensor_id = None):
+    global sensors
+    if sensor_id is None:
+        for _, sensor in sensors.items():
+            data = {'sensor_id': sensor.id, 'value': sensor.target, 'accuracy': sensor.accuracy}
+            sio.emit("updated_targets", data, namespace="/sensor")
+    else:
+        sensor = sensors[sensor_id]
+        data = {'sensor_id': sensor.id, 'value': sensor.target, 'accuracy': sensor.accuracy}
+        sio.emit("updated_targets", data, namespace="/sensor")
+
 
 url = config['hub_url'] + "/sensor?api_key=" + config["api_key"]
 sensors = setup.get_sensors_from_config(config)
@@ -40,6 +64,7 @@ while True:
         try:
             sio.connect(url, namespaces=['/sensor'])
             connected = True
+            update_targets_on_server()
         except ConnectionError:
             print("Connection failed, try again after delay")
             connected = False
@@ -56,12 +81,10 @@ while True:
 
         end = time.time()
         duration = end - start
-        print(duration)
         waittime = max(0, delay - duration)
         time.sleep(waittime)
 
     except BadNamespaceError:
-        connected = False
         print("Namespace error, probably the hub is down. Keep on trying")
 
 
