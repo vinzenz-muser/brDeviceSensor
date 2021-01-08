@@ -5,8 +5,8 @@ import os
 import time
 import random
 import requests
-from sensors import readSensor
 from controllers_register import controllers as configured_controllers
+from helpers import setup
 
 with open(r'config.yaml') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -23,59 +23,46 @@ def disconnect():
 
 @sio.event(namespace="/sensor")
 def update_controller(data):
-    global max_min_vals
-    val = float(data["value"])
+    target = float(data["value"])
     accuracy = float(data["accuracy"])
-    max_min_vals[data["sensor_id"]]["min"] = val - accuracy / 2
-    max_min_vals[data["sensor_id"]]["max"] =  val + accuracy / 2
+    sensor_id = int(data["sensor_id"])
+    sensors[sensor_id].setTarget(target)
+    sensors[sensor_id].setAccuracy(accuracy)
 
 url = config['hub_url'] + "/sensor?api_key=" + config["api_key"]
-sensor_configs = config["sensors"]
-
-sensors = dict()
-
-for config in sensor_configs:
-    controller_class = configured_controllers[config["type"]]
-    sensors[config["id"]] = {
-        "id": config["id"],
-        "controller": controller_class(config["settings"]),
-        "max": None,
-        "min": None
-    }
+sensors = setup.get_sensors_from_config(config)
 
 connected = False
 delay = 1
 
-while not connected:
-    try:
-        sio.connect(url, namespaces=['/sensor'])
-        connected = True
-    except ConnectionError:
-        print("Connection failed, try again in 1 seconds")
-        time.sleep(delay)
+while True:
+    if not connected:
+        try:
+            sio.connect(url, namespaces=['/sensor'])
+            connected = True
+        except ConnectionError:
+            print("Connection failed, try again after delay")
+            connected = False
 
-running = False
-while running:
     try:
         start = time.time()
-        data = readSensor("/sys/bus/w1/devices/28-0118685f51ff/w1_slave", sensor_ids)
-        print(max_min_vals)
-        try:
-            if max_min_vals[5]["max"] and max_min_vals[5]["min"]:
-                if max_min_vals[5]["min"] < data[5] < max_min_vals[5]["max"]:
-                    requests.get("http://192.168.1.236/relay?state=1")
-                else:
-                    requests.get("http://192.168.1.236/relay?state=0")
+        data = dict()
 
-        except KeyError:
-            pass
-        sio.emit("new_data", {"data": data}, namespace="/sensor")
+        for id, sensor in sensors.items():
+            data[id], update_state = sensor.updateState()
+
+        if connected:
+            sio.emit("new_data", {"data": data}, namespace="/sensor")
+
         end = time.time()
         duration = end - start
+        print(duration)
         waittime = max(0, delay - duration)
         time.sleep(waittime)
+
     except BadNamespaceError:
+        connected = False
         print("Namespace error, probably the hub is down. Keep on trying")
 
 
-sio.wait()
+#sio.wait()

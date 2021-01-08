@@ -1,5 +1,9 @@
-api_key: <api key>
-hub_url: <hub url>
-sensor_ids:
-  - <sensor id>
+api_key: <api_key>
+hub_url: <hub_url>
+sensors:
+  - id: <sensor_id>
+    address: <sensor_address>
+    type: <sensor_type>
+    settings:
+      <type-specific settings>
   - ...
