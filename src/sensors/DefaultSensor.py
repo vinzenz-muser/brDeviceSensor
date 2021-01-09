@@ -1,3 +1,5 @@
+import time
+
 class DefaultSensor:
     def __init__(self, id, address, controller=None, type="subtract", target=None, accuracy=None):
         self.id = id
@@ -18,24 +20,31 @@ class DefaultSensor:
         self.target = target
 
     def readData(self):
-        with open(self.path + self.address + "/w1_slave", "r") as f:
-            ans = f.readlines()
+        #start = time.time()
+        try:
+            with open(self.path + self.address + "/w1_slave", "r") as f:
+                ans = f.readlines()
 
-        first_line = ans[0].replace("\n", "")
-        success = first_line.split(" ")[-1] == "YES"
-        current_value = None
+            first_line = ans[0].replace("\n", "")
+            success = first_line.split(" ")[-1] == "YES"
+            current_value = None
 
-        if success:
-            data_line = ans[1].replace("\n", "")
-            if data_line[:2] != "00":
-                current_value = float(data_line.split("t=")[1])/1000
+            if success:
+                data_line = ans[1].replace("\n", "")
+                if data_line[:2] != "00":
+                    current_value = float(data_line.split("t=")[1])/1000
 
-        return current_value
+            #print(f"Reading {self.address} took {time.time() - start} seconds")
+
+            return current_value
+        except FileNotFoundError:
+            return None
 
     def updateState(self):
         current_data = self.readData()
+        #start = time.time()
         success = False
-        if self.controller and self.target and self.accuracy:
+        if current_data and self.controller and self.target and self.accuracy:
             max = self.target + self.accuracy
             min = self.target - self.accuracy
             try:
@@ -52,5 +61,5 @@ class DefaultSensor:
                 success = True
             except Exception as e:
                 pass
-
+        #print(f"Controlling {self.address} took {time.time() - start} seconds")
         return current_data, success
