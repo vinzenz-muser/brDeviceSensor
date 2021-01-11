@@ -7,7 +7,11 @@ import random
 import requests
 import json
 from controllers_register import controllers as configured_controllers
+from devices.DefaultDevice import DefaultDevice
 from helpers import setup
+from queue import Queue
+import threading
+
 
 with open(r'config.yaml') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -28,36 +32,21 @@ def update_controller(data):
     set_targets(data)
 
 def set_targets(data):
-    global sensors
-    target = float(data["value"])
-    accuracy = float(data["accuracy"])
-    sensor_id = int(data["sensor_id"])
-    sensors[sensor_id].setTarget(target)
-    sensors[sensor_id].setAccuracy(accuracy)
-
-    update_targets_on_server(sensor_id)
-
-    lastval = {sensor.id: {'target': sensor.target, 'accuracy': sensor.accuracy} for _, sensor in sensors.items()}
-    with open('src/fallback/controller_data.json', 'w') as f:
-        json.dump(lastval, f)
+    device.set_targets(data)
+    update_targets_on_server(data["sensor_id"])
 
 def update_targets_on_server(sensor_id = None):
-    global sensors
-    if sensor_id is None:
-        for _, sensor in sensors.items():
-            data = {'sensor_id': sensor.id, 'value': sensor.target, 'accuracy': sensor.accuracy}
-            sio.emit("updated_targets", data, namespace="/sensor")
-    else:
-        sensor = sensors[sensor_id]
-        data = {'sensor_id': sensor.id, 'value': sensor.target, 'accuracy': sensor.accuracy}
-        sio.emit("updated_targets", data, namespace="/sensor")
+    ans = device.get_sensor_targets(sensor_id)
+    sio.emit("updated_targets", ans, namespace="/sensor")
 
 
 url = config['hub_url'] + "/sensor?api_key=" + config["api_key"]
-sensors = setup.get_sensors_from_config(config)
 
 connected = False
 delay = 1
+
+device = DefaultDevice()
+device.load_from_config(config)
 
 while True:
     if not connected:
@@ -71,17 +60,15 @@ while True:
 
     try:
         start = time.time()
-        data = dict()
 
-        for id, sensor in sensors.items():
-            data[id], update_state = sensor.updateState()
-
+        data = device.get_sensor_values()
         if connected:
             sio.emit("new_data", {"data": data}, namespace="/sensor")
 
         end = time.time()
         duration = end - start
         waittime = max(0, delay - duration)
+
         time.sleep(waittime)
 
     except BadNamespaceError:
