@@ -1,6 +1,7 @@
 from joblib import Parallel, delayed
 from helpers import setup
 import json
+import time
 
 
 class DefaultDevice:
@@ -34,7 +35,7 @@ class DefaultDevice:
             try:
                 sensor = self.sensors[sensor_id]
                 data = {'sensor_id': sensor.id, 'value': sensor.target, 'accuracy': sensor.accuracy}
-                return data
+                return [data]
             except KeyError:
                 return {}
 
@@ -44,4 +45,5 @@ class DefaultDevice:
 
     def get_sensor_values(self):
         ans = Parallel(self.n_jobs)(delayed(self._update_sensor_state)(id) for id, _ in self.sensors.items())
+
         return {i[0]: i[1] for i in ans}

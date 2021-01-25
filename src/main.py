@@ -18,9 +18,10 @@ with open(r'config.yaml') as file:
 
 sio = Client()
 
-@sio.event
+@sio.event(namespace='/sensor')
 def connect():
     print('connection established')
+    update_targets_on_server()
 
 @sio.event
 def disconnect():
@@ -53,22 +54,20 @@ while True:
         try:
             sio.connect(url, namespaces=['/sensor'])
             connected = True
-            update_targets_on_server()
         except ConnectionError:
-            print("Connection failed, try again after delay")
+            print(f"Connection to {url} failed, t   ry again after delay")
             connected = False
 
     try:
         start = time.time()
-
         data = device.get_sensor_values()
+
         if connected:
             sio.emit("new_data", {"data": data}, namespace="/sensor")
 
         end = time.time()
         duration = end - start
         waittime = max(0, delay - duration)
-
         time.sleep(waittime)
 
     except BadNamespaceError:
