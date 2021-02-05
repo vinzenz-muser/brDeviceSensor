@@ -1,14 +1,14 @@
 import time
 
-class DefaultSensor:
-    def __init__(self, id, address, controller=None, type="subtract", target=None, accuracy=None):
-        self.id = id
-        self.address = address
-        self.controller = controller
+class Sensor:
+    def __init__(self, config):
+        self.id = config["id"]
+        self.address = config["address"]
+        self.controller = config["controller"]
         self.path = "/sys/bus/w1/devices/"
-        self.target = target
-        self.accuracy = accuracy
-        self.type = type
+        self.target = config["target"]
+        self.accuracy = config["accuracy"]
+        self.type = config["type"]
 
     def __str__(self):
         return f"<DefaultSensor: id {self.id}, address: {self.address}, target {self.target}, type: {self.type}"

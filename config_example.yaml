@@ -4,6 +4,7 @@ sensors:
   - id: <sensor_id>
     address: <sensor_address>
     type: <sensor_type>
+    controller: <controller_type>
     settings:
       <type-specific settings>
   - ...

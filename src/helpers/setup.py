@@ -7,7 +7,7 @@ def get_sensors_from_config(config):
     sensors = dict()
 
     for config in sensor_configs:
-        controller_class = controllers[config["type"]]
+        controller_class = controllers[config["controller"]]
         sensors[config["id"]] = DefaultSensor(
             id = config["id"],
             address = config["address"],

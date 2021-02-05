@@ -22,9 +22,13 @@ sio = Client()
 def connect():
     print('connection established')
     update_targets_on_server()
+    sio.emit("new_data", {"data": {}}, namespace="/sensor")
+    print('targets updated')
 
 @sio.event
 def disconnect():
+    global connected
+    connected=False
     print('disconnected from server')
 
 @sio.event(namespace="/sensor")
@@ -48,21 +52,25 @@ delay = 1
 
 device = DefaultDevice()
 device.load_from_config(config)
+print("Starting")
 
 while True:
     if not connected:
         try:
-            sio.connect(url, namespaces=['/sensor'])
+            sio.connect(url)
+            print("Connected and working")
             connected = True
-        except ConnectionError:
-            print(f"Connection to {url} failed, t   ry again after delay")
+        except ConnectionError as e:
+            print(e)
+            print(f"Connection to {url} failed, try again after delay")
             connected = False
 
     try:
         start = time.time()
         data = device.get_sensor_values()
-
+        print(data)
         if connected:
+            print("Sending", data)
             sio.emit("new_data", {"data": data}, namespace="/sensor")
 
         end = time.time()
@@ -72,6 +80,3 @@ while True:
 
     except BadNamespaceError:
         print("Namespace error, probably the hub is down. Keep on trying")
-
-
-#sio.wait()
