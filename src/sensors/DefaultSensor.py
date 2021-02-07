@@ -6,8 +6,8 @@ class Sensor:
         self.address = config["address"]
         self.controller = config["controller"]
         self.path = "/sys/bus/w1/devices/"
-        self.target = config["target"]
-        self.accuracy = config["accuracy"]
+        self.target = config["target"] or None
+        self.accuracy = config["accuracy"] or None
         self.type = config["type"]
 
     def __str__(self):
