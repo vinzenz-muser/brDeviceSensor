@@ -1,17 +1,19 @@
 import json
-from sensors.DefaultSensor import DefaultSensor
-from controllers_register import controllers
+import register
 
 def get_sensors_from_config(config):
     sensor_configs = config["sensors"]
     sensors = dict()
 
     for config in sensor_configs:
-        controller_class = controllers[config["controller"]]
-        sensors[config["id"]] = DefaultSensor(
-            id = config["id"],
-            address = config["address"],
-            controller = controller_class(config["settings"])
+        controller_class = register.controllers[config["controller"]]
+        sensor_class = register.sensors[config["type"]]
+        sensors[config["id"]] = sensor_class(
+            dict(
+                id = config["id"],
+                address = config["address"],
+                controller = controller_class(config["settings"])
+            )
         )
 
     try:

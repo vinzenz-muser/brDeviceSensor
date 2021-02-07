@@ -1,7 +1,12 @@
-import controllers.MyStrom as MyStrom
-import controllers.NoController as NoController
+import controllers.MyStrom, controllers.NoController
+import sensors.DefaultSensor, sensors.RandomSensor
 
 controllers = {
-    "mystrom": MyStrom.Controller,
-    "none": NoController.Controller
+    "mystrom": controllers.MyStrom.Controller,
+    "none": controllers.NoController.Controller
+}
+
+sensors = {
+    "default": sensors.DefaultSensor.Sensor,
+    "random": sensors.RandomSensor.Sensor
 }

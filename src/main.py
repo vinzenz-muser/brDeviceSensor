@@ -6,7 +6,7 @@ import time
 import random
 import requests
 import json
-from controllers_register import controllers as configured_controllers
+from register import controllers as configured_controllers
 from devices.DefaultDevice import DefaultDevice
 from helpers import setup
 from queue import Queue

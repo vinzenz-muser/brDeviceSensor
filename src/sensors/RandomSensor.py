@@ -3,6 +3,7 @@ import random
 
 class Sensor:
     def __init__(self, config):
+        self.id = config["id"]
         self.accuracy = None
         self.target = None
 
@@ -20,7 +21,7 @@ class Sensor:
             ans = random.random() * self.accuracy - 1/2*self.accuracy + self.target
         else:
             ans = 100*random.random()
-        return random.random() * self.accuracy - 1/2*self.accuracy + self.target
+        return ans
 
     def updateState(self):
         current_data = self.readData()
