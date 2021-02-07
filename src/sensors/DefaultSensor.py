@@ -6,6 +6,7 @@ class Sensor:
         self.address = config["address"]
         self.controller = config["controller"]
         self.path = "/sys/bus/w1/devices/"
+
         if "target" not in config:
             config["target"] = None
         self.target = config["target"]
@@ -13,8 +14,8 @@ class Sensor:
         if "accuracy" not in config:
             config["accuracy"] = None
         self.accuracy = config["accuracy"]
-        
-        self.type = config["type"]
+
+        self.type = config["behaviour"]
 
     def __str__(self):
         return f"<DefaultSensor: id {self.id}, address: {self.address}, target {self.target}, type: {self.type}"
