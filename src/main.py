@@ -76,7 +76,7 @@ while True:
         end = time.time()
         duration = end - start
         waittime = max(0, delay - duration)
-        time.sleep(waittime)
+        sio.sleep(waittime)
 
     except BadNamespaceError:
         print("Namespace error, probably the hub is down. Keep on trying")

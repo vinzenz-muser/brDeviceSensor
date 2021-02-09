@@ -15,7 +15,7 @@ class Sensor:
             config["accuracy"] = None
         self.accuracy = config["accuracy"]
 
-        self.type = config["behaviour"]
+        self.type = "subtract"
 
     def __str__(self):
         return f"<DefaultSensor: id {self.id}, address: {self.address}, target {self.target}, type: {self.type}"
