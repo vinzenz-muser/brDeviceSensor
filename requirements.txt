@@ -1,4 +1,4 @@
-python-socketio
 pyyaml
+python-socketio[client]
 joblib
 requests
