@@ -1,8 +1,8 @@
 class ControllerInterface:
-    def on(self):
+    def turnOn(self):
         """Define how the controller is turned on"""
         pass
 
-    def off(self):
+    def turnOff(self):
         """Define how the controller is turned off"""
         pass

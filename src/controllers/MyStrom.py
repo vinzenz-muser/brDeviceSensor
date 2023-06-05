@@ -1,9 +1,11 @@
 import controllers.Interface as Interface
 import requests
 
+
 class Controller(Interface.ControllerInterface):
     def __init__(self, settings):
         self.ip = settings["ip"]
+
     def __str__(self):
         return f"<Controller: ip: {self.ip}>"
 
